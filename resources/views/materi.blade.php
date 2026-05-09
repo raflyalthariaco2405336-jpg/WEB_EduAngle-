@@ -13,7 +13,7 @@
         @forelse($modules as $module)
         <div class="materi-card glass-panel">
             @if($module->image_path)
-                <img src="{{ Storage::url($module->image_path) }}" alt="{{ $module->title }}" class="materi-card-img" style="object-fit: cover; width: 100%; max-height: 200px;">
+                <img src="{{ asset($module->image_path) }}" alt="{{ $module->title }}" class="materi-card-img" style="object-fit: cover; width: 100%; max-height: 200px;">
             @else
                 <img src="https://placehold.co/600x400/4f46e5/ffffff?text={{ urlencode($module->title) }}" alt="{{ $module->title }}" class="materi-card-img">
             @endif

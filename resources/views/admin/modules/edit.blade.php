@@ -41,7 +41,7 @@
                 
                 @if($module->image_path)
                     <div style="margin-bottom: 1rem;">
-                        <img src="{{ Storage::url($module->image_path) }}" alt="Preview" style="max-width: 100%; height: auto; border-radius: 8px;">
+                        <img src="{{ asset($module->image_path) }}" alt="Preview" style="max-width: 100%; height: auto; border-radius: 8px;">
                     </div>
                 @endif
                 

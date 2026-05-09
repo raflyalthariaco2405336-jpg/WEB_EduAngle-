@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 use App\Models\Module;
 
 class ModuleController extends Controller
@@ -35,8 +35,10 @@ class ModuleController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('modules', 'public');
-            $validated['image_path'] = $imagePath;
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('aset/modules'), $imageName);
+            $validated['image_path'] = 'aset/modules/' . $imageName;
         }
 
         Module::create($validated);
@@ -58,11 +60,13 @@ class ModuleController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            if ($module->image_path) {
-                Storage::disk('public')->delete($module->image_path);
+            if ($module->image_path && File::exists(public_path($module->image_path))) {
+                File::delete(public_path($module->image_path));
             }
-            $imagePath = $request->file('image')->store('modules', 'public');
-            $validated['image_path'] = $imagePath;
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('aset/modules'), $imageName);
+            $validated['image_path'] = 'aset/modules/' . $imageName;
         }
 
         $module->update($validated);
@@ -72,8 +76,8 @@ class ModuleController extends Controller
 
     public function destroy(Module $module)
     {
-        if ($module->image_path) {
-            Storage::disk('public')->delete($module->image_path);
+        if ($module->image_path && File::exists(public_path($module->image_path))) {
+            File::delete(public_path($module->image_path));
         }
         $module->delete();
 

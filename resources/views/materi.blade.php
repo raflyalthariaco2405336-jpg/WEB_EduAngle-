@@ -19,7 +19,10 @@
             @endif
             <div class="materi-card-content">
                 <h3>{{ $module->title }}</h3>
-                <p>{{ $module->description }}</p>
+                <p class="text-truncate-2">{{ $module->description }}</p>
+                <div style="margin-top: auto;">
+                    <a href="{{ route('materi.show', $module->id) }}" class="btn btn-primary btn-sm" style="width: 100%;"><i class="fa-solid fa-eye"></i> View Details</a>
+                </div>
             </div>
         </div>
         @empty

@@ -21,6 +21,14 @@ class UserSeeder extends Seeder
         ]);
 
         \App\Models\User::create([
+            'name' => 'Pak Guru Budi',
+            'username' => 'teacher',
+            'email' => 'teacher@eduangle.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'role' => 'teacher'
+        ]);
+
+        \App\Models\User::create([
             'name' => 'Siswa Kreatif',
             'username' => 'siswa',
             'email' => 'siswa@eduangle.com',

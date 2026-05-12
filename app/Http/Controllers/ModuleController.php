@@ -15,6 +15,11 @@ class ModuleController extends Controller
         return view('materi', compact('modules'));
     }
 
+    public function publicShow(Module $module)
+    {
+        return view('materi_show', compact('module'));
+    }
+
     public function index()
     {
         $modules = Module::all();

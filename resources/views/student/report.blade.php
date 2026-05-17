@@ -77,13 +77,19 @@
                 $badgeColors = ['Excellent' => ['bg'=>'rgba(16,185,129,0.15)','color'=>'#10b981'], 'Good' => ['bg'=>'rgba(245,158,11,0.15)','color'=>'#f59e0b'], 'Needs Improvement' => ['bg'=>'rgba(244,63,94,0.15)','color'=>'#f43f5e']];
                 $bc = $badgeColors[$fb->status] ?? ['bg'=>'rgba(255,255,255,0.1)','color'=>'white'];
             @endphp
-            <div style="padding: 1rem; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); margin-bottom: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span style="font-weight: 600; font-size: 0.9rem; color: var(--secondary);">{{ $fb->teacher?->name ?? 'Guru' }}</span>
-                    <span style="padding: 0.2rem 0.8rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; background: {{ $bc['bg'] }}; color: {{ $bc['color'] }};">{{ $fb->status }}</span>
+            <div style="padding: 1.25rem; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.9rem; color: var(--secondary);">
+                            {{ $fb->teacher?->name ?? 'Guru' }} &rarr; {{ $fb->student?->name ?? $user->name }}
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">
+                            {{ $fb->created_at->format('d M Y, H:i') }} ({{ $fb->created_at->diffForHumans() }})
+                        </div>
+                    </div>
+                    <span style="padding: 0.2rem 0.8rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; background: {{ $bc['bg'] }}; color: {{ $bc['color'] }}; flex-shrink: 0;">{{ $fb->status }}</span>
                 </div>
-                <p style="color: var(--text-main); margin: 0; font-size: 0.9rem; line-height: 1.6;">{{ $fb->comment }}</p>
-                <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">{{ $fb->updated_at->format('d M Y') }}</div>
+                <p style="color: var(--text-main); margin: 0.5rem 0 0 0; font-size: 0.95rem; line-height: 1.6;">{{ $fb->comment }}</p>
             </div>
             @empty
             <div style="text-align: center; padding: 2rem 0;">

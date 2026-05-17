@@ -37,7 +37,7 @@ class TeacherDashboardController extends Controller
         return view('teacher.dashboard', compact('students', 'search', 'totalStudents', 'totalAttempts', 'overallAvg'));
     }
 
-    public function showStudent(User $student)
+    public function showStudent(Request $request, User $student)
     {
         $results = QuizResult::where('user_id', $student->id)
             ->with('quiz')
@@ -49,14 +49,18 @@ class TeacherDashboardController extends Controller
             ->latest()
             ->get();
 
-        $myFeedback = TeacherFeedback::where('student_id', $student->id)
-            ->where('teacher_id', Auth::id())
-            ->first();
+        $editFeedbackId = $request->query('edit_feedback_id');
+        $editingFeedback = null;
+        if ($editFeedbackId) {
+            $editingFeedback = TeacherFeedback::where('id', $editFeedbackId)
+                ->where('teacher_id', Auth::id())
+                ->first();
+        }
 
         $avgScore = $results->count() > 0
             ? round($results->avg(fn($r) => $r->total_questions > 0 ? ($r->score / $r->total_questions) * 100 : 0))
             : null;
 
-        return view('teacher.student_detail', compact('student', 'results', 'feedbacks', 'myFeedback', 'avgScore'));
+        return view('teacher.student_detail', compact('student', 'results', 'feedbacks', 'editingFeedback', 'avgScore'));
     }
 }

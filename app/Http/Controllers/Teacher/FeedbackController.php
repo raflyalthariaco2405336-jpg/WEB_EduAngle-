@@ -17,20 +17,44 @@ class FeedbackController extends Controller
             'status'  => 'required|in:Needs Improvement,Good,Excellent',
         ]);
 
-        TeacherFeedback::updateOrCreate(
-            ['teacher_id' => Auth::id(), 'student_id' => $student->id],
-            ['comment' => $request->comment, 'status' => $request->status]
-        );
+        TeacherFeedback::create([
+            'teacher_id' => Auth::id(),
+            'student_id' => $student->id,
+            'comment'    => $request->comment,
+            'status'     => $request->status,
+        ]);
 
-        return back()->with('success', 'Feedback saved successfully.');
+        return back()->with('success', 'Feedback added successfully.');
     }
 
-    public function destroy(User $student)
+    public function update(Request $request, TeacherFeedback $feedback)
     {
-        TeacherFeedback::where('teacher_id', Auth::id())
-            ->where('student_id', $student->id)
-            ->delete();
+        if ($feedback->teacher_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
 
-        return back()->with('success', 'Feedback removed.');
+        $request->validate([
+            'comment' => 'required|string|max:1000',
+            'status'  => 'required|in:Needs Improvement,Good,Excellent',
+        ]);
+
+        $feedback->update([
+            'comment' => $request->comment,
+            'status'  => $request->status,
+        ]);
+
+        return redirect()->route('teacher.student.show', $feedback->student_id)->with('success', 'Feedback updated successfully.');
+    }
+
+    public function destroy(TeacherFeedback $feedback)
+    {
+        if ($feedback->teacher_id !== Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $studentId = $feedback->student_id;
+        $feedback->delete();
+
+        return redirect()->route('teacher.student.show', $studentId)->with('success', 'Feedback removed.');
     }
 }

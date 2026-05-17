@@ -62,37 +62,37 @@
 
         <!-- Feedback panel -->
         <div>
-            <!-- My feedback form -->
+            <!-- Feedback form (Add / Edit) -->
             <div class="glass-panel" style="padding: 2rem; margin-bottom: 1.5rem;">
                 <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;"><i class="fa-solid fa-pen-to-square" style="color: var(--primary);"></i>
-                    {{ $myFeedback ? 'Edit My Feedback' : 'Add Feedback' }}
+                    {{ $editingFeedback ? 'Edit Feedback' : 'Add Feedback' }}
                 </h3>
-                <form action="{{ route('teacher.feedback.store', $student) }}" method="POST">
+                <form action="{{ $editingFeedback ? route('teacher.feedback.update', $editingFeedback) : route('teacher.feedback.store', $student) }}" method="POST">
                     @csrf
+                    @if($editingFeedback)
+                        @method('PUT')
+                    @endif
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.4rem;">Status</label>
                         <select name="status" required style="width: 100%; padding: 0.7rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); color: white; font-family: inherit;">
                             @foreach(['Needs Improvement', 'Good', 'Excellent'] as $s)
-                            <option value="{{ $s }}" style="background: #1e293b;" {{ $myFeedback?->status === $s ? 'selected' : '' }}>{{ $s }}</option>
+                            <option value="{{ $s }}" style="background: #1e293b;" {{ ($editingFeedback?->status ?? '') === $s ? 'selected' : '' }}>{{ $s }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div style="margin-bottom: 1rem;">
                         <label style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.4rem;">Comment</label>
                         <textarea name="comment" rows="4" required placeholder="e.g. Good understanding of High Angle techniques…"
-                            style="width: 100%; padding: 0.8rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); color: white; font-family: inherit; resize: vertical; font-size: 0.95rem;">{{ $myFeedback?->comment }}</textarea>
+                            style="width: 100%; padding: 0.8rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); color: white; font-family: inherit; resize: vertical; font-size: 0.95rem;">{{ $editingFeedback?->comment }}</textarea>
                     </div>
                     <div style="display: flex; gap: 0.75rem;">
                         <button type="submit" class="btn btn-primary" style="flex: 1; padding: 0.7rem;">
-                            <i class="fa-solid fa-save"></i> Save Feedback
+                            <i class="fa-solid fa-save"></i> {{ $editingFeedback ? 'Save Changes' : 'Save Feedback' }}
                         </button>
-                        @if($myFeedback)
-                        <form action="{{ route('teacher.feedback.destroy', $student) }}" method="POST" style="flex: 0;">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-outline" style="padding: 0.7rem 1rem; border-color: var(--accent); color: var(--accent);">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </form>
+                        @if($editingFeedback)
+                            <a href="{{ route('teacher.student.show', $student) }}" class="btn btn-outline" style="padding: 0.7rem 1rem; color: var(--text-muted); border-color: var(--glass-border); text-decoration: none; text-align: center;">
+                                Cancel
+                            </a>
                         @endif
                     </div>
                 </form>
@@ -105,12 +105,30 @@
                 @foreach($feedbacks as $fb)
                 @php $badgeColors = ['Excellent'=>['#10b981','rgba(16,185,129,0.1)'],'Good'=>['#f59e0b','rgba(245,158,11,0.1)'],'Needs Improvement'=>['#f43f5e','rgba(244,63,94,0.1)']];
                      [$fc, $fbg] = $badgeColors[$fb->status] ?? ['white','rgba(255,255,255,0.05)']; @endphp
-                <div style="background: {{ $fbg }}; border-radius: 10px; padding: 1rem; margin-bottom: 0.75rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span style="font-weight: 600; font-size: 0.85rem; color: var(--secondary);">{{ $fb->teacher?->name }}</span>
-                        <span style="font-size: 0.75rem; font-weight: 700; color: {{ $fc }};">{{ $fb->status }}</span>
+                <div style="background: {{ $fbg }}; border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; border: 1px solid var(--glass-border);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                        <div>
+                            <span style="font-weight: 600; font-size: 0.85rem; color: var(--secondary);">{{ $fb->teacher?->name }}</span>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                {{ $fb->created_at->format('d M Y, H:i') }} ({{ $fb->created_at->diffForHumans() }})
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 0.75rem; font-weight: 700; color: {{ $fc }}; background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: 4px;">{{ $fb->status }}</span>
+                            @if($fb->teacher_id === Auth::id())
+                                <a href="{{ route('teacher.student.show', [$student, 'edit_feedback_id' => $fb->id]) }}" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; border-color: rgba(255,255,255,0.15); color: var(--text-muted);" title="Edit feedback">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </a>
+                                <form action="{{ route('teacher.feedback.destroy', $fb) }}" method="POST" onsubmit="return confirm('Delete this feedback?')" style="display: inline;">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; border-color: rgba(244,63,94,0.3); color: var(--accent);" title="Delete feedback">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
-                    <p style="margin: 0; font-size: 0.9rem; color: var(--text-main);">{{ $fb->comment }}</p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.95rem; color: var(--text-main); line-height: 1.4;">{{ $fb->comment }}</p>
                 </div>
                 @endforeach
             </div>

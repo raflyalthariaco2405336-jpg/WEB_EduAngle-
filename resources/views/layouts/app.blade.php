@@ -31,7 +31,9 @@
             
             @auth
                 <li><a href="{{ route('materi') }}" class="{{ request()->routeIs('materi*') ? 'active' : '' }}">Materi</a></li>
-                <li><a href="{{ route('quizzes.index') }}" class="{{ request()->routeIs('quizzes*') ? 'active' : '' }}">Quiz</a></li>
+                @if(Auth::user()->role === 'student')
+                    <li><a href="{{ route('quizzes.index') }}" class="{{ request()->routeIs('quizzes*') ? 'active' : '' }}">Quiz</a></li>
+                @endif
                 <li><a href="{{ route('simulasi') }}" class="{{ request()->routeIs('simulasi') ? 'active' : '' }}">Simulasi 3D</a></li>
                 @if(Auth::user()->role === 'student')
                     <li><a href="{{ route('student.report') }}" class="{{ request()->routeIs('student.report') ? 'active' : '' }}">My Report</a></li>
@@ -44,7 +46,8 @@
                 @if(Auth::user()->role === 'admin')
                     <li><a href="{{ route('dashboard.admin') }}" class="{{ request()->is('admin/*') ? 'active' : '' }}"><i class="fa-solid fa-user-shield"></i> Admin</a></li>
                 @elseif(Auth::user()->role === 'teacher')
-                    <li><a href="{{ route('teacher.dashboard') }}" class="{{ request()->is('teacher/*') ? 'active' : '' }}"><i class="fa-solid fa-chalkboard-user"></i> Teacher</a></li>
+                    <li><a href="{{ route('teacher.dashboard') }}" class="{{ request()->routeIs('teacher.dashboard') || request()->routeIs('teacher.student.*') ? 'active' : '' }}"><i class="fa-solid fa-chalkboard-user"></i> Teacher Dashboard</a></li>
+                    <li><a href="{{ route('teacher.quizzes.index') }}" class="{{ request()->routeIs('teacher.quizzes.*') ? 'active' : '' }}"><i class="fa-solid fa-list-check"></i> Manage Quizzes</a></li>
                 @endif
             @endauth
 

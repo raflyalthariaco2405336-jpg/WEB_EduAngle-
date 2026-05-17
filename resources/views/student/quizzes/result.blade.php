@@ -67,8 +67,71 @@
             'Excellent' => 'Luar biasa! Kamu menguasai materi angle kamera dengan sangat baik!',
         ];
     @endphp
-    <div class="glass-panel" style="padding: 1.5rem; background: rgba({{ $percentage >= 80 ? '16,185,129' : ($percentage >= 60 ? '245,158,11' : '244,63,94') }}, 0.07);">
+    <div class="glass-panel" style="padding: 1.5rem; background: rgba({{ $percentage >= 80 ? '16,185,129' : ($percentage >= 60 ? '245,158,11' : '244,63,94') }}, 0.07); margin-bottom: 2rem;">
         <p style="margin: 0; color: var(--text-main);"><i class="fa-solid fa-lightbulb" style="color: #f59e0b;"></i> {{ $tips[$grade] }}</p>
     </div>
+
+    <!-- Review Section -->
+    @if(isset($review) && count($review) > 0)
+    <div class="glass-panel" style="padding: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; font-size: 1.2rem; color: white;"><i class="fa-solid fa-square-poll-horizontal" style="color: var(--secondary);"></i> Review Pertanyaan</h3>
+        
+        @foreach($review as $i => $item)
+        <div style="padding: 1.5rem; border-radius: 10px; background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); margin-bottom: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
+                <h4 style="margin: 0; font-size: 1rem; color: white; line-height: 1.5;">
+                    <span style="color: var(--secondary);">Q{{ $i + 1 }}.</span> {{ $item['question_text'] }}
+                </h4>
+                @if($item['is_correct'])
+                    <span style="background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0;">
+                        <i class="fa-solid fa-circle-check"></i> Benar
+                    </span>
+                @else
+                    <span style="background: rgba(244,63,94,0.12); color: #f43f5e; border: 1px solid rgba(244,63,94,0.3); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0;">
+                        <i class="fa-solid fa-circle-xmark"></i> Salah
+                    </span>
+                @endif
+            </div>
+
+            @if($item['image_path'])
+                <img src="{{ asset($item['image_path']) }}" style="max-width: 100%; max-height: 160px; object-fit: cover; border-radius: 6px; margin-bottom: 1rem; border: 1px solid var(--glass-border);">
+            @endif
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 0.5rem; margin-left: 0;">
+                @foreach($item['answers'] as $ans)
+                    @php
+                        $isSubmitted = ($ans->id == $item['submitted_id']);
+                        $isCorrectOption = $ans->is_correct;
+                        
+                        $bgColor = 'rgba(255,255,255,0.02)';
+                        $borderColor = 'var(--glass-border)';
+                        $textColor = 'var(--text-muted)';
+                        $icon = '○';
+                        
+                        if ($isCorrectOption) {
+                            $bgColor = 'rgba(16,185,129,0.08)';
+                            $borderColor = 'rgba(16,185,129,0.4)';
+                            $textColor = '#10b981';
+                            $icon = '✓';
+                        } elseif ($isSubmitted && !$item['is_correct']) {
+                            $bgColor = 'rgba(244,63,94,0.08)';
+                            $borderColor = 'rgba(244,63,94,0.4)';
+                            $textColor = '#f43f5e';
+                            $icon = '✗';
+                        }
+                    @endphp
+                    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 8px; background: {{ $bgColor }}; border: 1px solid {{ $borderColor }}; color: {{ $textColor }}; font-size: 0.9rem;">
+                        <span style="font-weight: 800; font-size: 1rem; width: 16px;">{{ $icon }}</span>
+                        <span>{{ $ans->answer_text }}</span>
+                        @if($isSubmitted)
+                            <span style="font-size: 0.7rem; font-weight: 700; margin-left: auto; opacity: 0.8; background: rgba(255,255,255,0.06); padding: 0.15rem 0.4rem; border-radius: 4px; color: white;">Jawaban Anda</span>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endforeach
+    </div>
+    @endif
 </section>
 @endsection

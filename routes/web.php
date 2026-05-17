@@ -19,7 +19,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/logout', [AuthController::class, 'logout']);
 
-// ─── Authenticated routes (all roles) ─────────────────────────────────────────
+// ─── Authenticated routes ─────────────────────────────────────────────────────
 Route::middleware(['auth'])->group(function () {
     // Learning modules
     Route::get('/materi', [ModuleController::class, 'publicIndex'])->name('materi');
@@ -27,13 +27,16 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/simulasi', fn() => view('simulation'))->name('simulasi');
 
-    // Quizzes (students play)
-    Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index');
-    Route::get('/quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
-    Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submit'])->name('quizzes.submit');
+    // Student Only Routes
+    Route::middleware(['role:student'])->group(function () {
+        // Quizzes (students play)
+        Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index');
+        Route::get('/quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
+        Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submit'])->name('quizzes.submit');
 
-    // Student report
-    Route::get('/report', [StudentReportController::class, 'index'])->name('student.report');
+        // Student report
+        Route::get('/report', [StudentReportController::class, 'index'])->name('student.report');
+    });
 });
 
 // ─── Teacher routes ────────────────────────────────────────────────────────────
@@ -41,7 +44,13 @@ Route::middleware(['auth', 'role:teacher,admin'])->prefix('teacher')->name('teac
     Route::get('/dashboard', [TeacherDashboardController::class, 'index'])->name('dashboard');
     Route::get('/students/{student}', [TeacherDashboardController::class, 'showStudent'])->name('student.show');
     Route::post('/students/{student}/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
-    Route::delete('/students/{student}/feedback', [FeedbackController::class, 'destroy'])->name('feedback.destroy');
+    Route::put('/feedback/{feedback}', [FeedbackController::class, 'update'])->name('feedback.update');
+    Route::delete('/feedback/{feedback}', [FeedbackController::class, 'destroy'])->name('feedback.destroy');
+
+    // Quiz management CRUD for teachers
+    Route::resource('quizzes', \App\Http\Controllers\Teacher\QuizManagementController::class);
+    Route::post('quizzes/{quiz}/questions', [\App\Http\Controllers\Teacher\QuizManagementController::class, 'storeQuestion'])->name('quizzes.questions.store');
+    Route::delete('questions/{question}', [\App\Http\Controllers\Teacher\QuizManagementController::class, 'destroyQuestion'])->name('questions.destroy');
 });
 
 // ─── Admin only routes ─────────────────────────────────────────────────────────
